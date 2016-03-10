@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <title>Rosie by Karumi</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  </head>
+  <body>
+    <section class="page-header">
+      <h1 class="project-name">Rosie</h1>
+      <h2 class="project-tagline">Rosie is an Android framework to create applications following the principles of Clean Architecture.</h2>
+      <a href="https://github.com/Karumi/Rosie" class="btn">View on GitHub</a>
+      <a href="https://github.com/Karumi/Rosie/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/Karumi/Rosie/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
+
+    <section class="main-content">
+      <h1>
+<a id="rosie--" class="anchor" href="#rosie--" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a><img src="./art/karumilogo.png" alt="Karumi logo">Rosie <a href="https://travis-ci.org/Karumi/Rosie"><img src="https://travis-ci.org/Karumi/Rosie.svg?branch=master" alt="Build Status"></a> <a href="https://maven-badges.herokuapp.com/maven-central/com.karumi.rosie/rosie"><img src="https://maven-badges.herokuapp.com/maven-central/com.karumi.rosie/rosie/badge.svg" alt="Maven Central"></a>
+</h1>
+
+<blockquote>
+<p>The only way to make the deadline—the only way to go fast—is to keep the code as clean as possible at all times.</p>
+
+<p>—  Robert C. Martin in <a href="http://www.amazon.com/Clean-Code-Handbook-Software-Craftsmanship/dp/0132350882">Clean Code: A Handbook of Agile Software Craftsmanship</a></p>
+</blockquote>
+
+<h2>
+<a id="introduction" class="anchor" href="#introduction" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Introduction</h2>
+
+<p>Rosie is an Android framework to create applications following the principles of <a href="https://blog.8thlight.com/uncle-bob/2012/08/13/the-clean-architecture.html">Clean Architecture</a>.</p>
+
+<p>Rosie divides your application in three layers, <strong>view</strong>, <strong>domain</strong> and <strong>repository</strong>. For each layer, Rosie provides plenty of classes that will make defining and separating these concerns much easier.</p>
+
+<ul>
+<li>
+<strong>View</strong>: It contains all your presentation logic, implemented through the <a href="http://martinfowler.com/eaaDev/uiArchs.html#Model-view-presentermvp">Model-View-Presenter pattern</a>. Rosie provides classes to represent the main components of this layer like <code>RosieActivity</code>, <code>RosieFragment</code> or <code>RosiePresenter</code>.</li>
+<li>
+<strong>Domain</strong>: Holding all your business logic, its main component is <code>RosieUseCase</code> that gives you an easy way to define your application use cases and execute them in a background thread using the <a href="http://www.oodesign.com/command-pattern.html">command pattern</a>.</li>
+<li>
+<strong>Repository</strong>: This layer gives you an abstraction of how to retrieve and store data in your application following the <a href="https://msdn.microsoft.com/en-us/library/ff649690.aspx">Repository pattern</a>. <code>RosieRepository</code> and the multiple <code>DataSource</code> classes gives you the base to start building your own repositories.</li>
+</ul>
+
+<p>Finally, Rosie comes with Dagger to solve Dependency inversion through <a href="http://martinfowler.com/articles/injection.html">Dependency Injection</a>.</p>
+
+<h2>
+<a id="screenshots" class="anchor" href="#screenshots" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Screenshots</h2>
+
+<p><img src="./art/screencast.gif" alt="Screencast"></p>
+
+<h2>
+<a id="usage" class="anchor" href="#usage" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Usage</h2>
+
+<p>First thing you will need to do is to make your own <code>Application</code> instance extend <code>RosieApplication</code> in order to provide your global dependencies module to Dagger:</p>
+
+<div class="highlight highlight-source-java"><pre><span class="pl-k">public</span> <span class="pl-k">class</span> <span class="pl-en">SampleApplication</span> <span class="pl-k">extends</span> <span class="pl-e">RosieApplication</span> {
+    <span class="pl-k">@Override</span> <span class="pl-k">protected</span> <span class="pl-k">List&lt;<span class="pl-smi">Object</span>&gt;</span> <span class="pl-en">getApplicationModules</span>() {
+        <span class="pl-k">return</span> <span class="pl-smi">Arrays</span><span class="pl-k">.</span>asList((<span class="pl-smi">Object</span>) <span class="pl-k">new</span> <span class="pl-smi">SampleGlobalModule</span>());
+    }
+}</pre></div>
+
+<p>Rosie provides several base classes to start implementing your architecture separated in three layers, <strong>view</strong>, <strong>domain</strong> and <strong>repository</strong>. Let's explore them in detail.</p>
+
+<h3>
+<a id="view" class="anchor" href="#view" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>View</h3>
+
+<p>The view package contains all the classes needed to implement your presentation logic following the MVP pattern. To use the view package, make your <code>Activity</code> extend from <code>RosieActivity</code> or your <code>Fragment</code> from <code>RosieFragment</code> and specify the layout that Rosie will automatically inflate for you:</p>
+
+<div class="highlight highlight-source-java"><pre><span class="pl-k">public</span> <span class="pl-k">class</span> <span class="pl-en">SampleActivity</span> <span class="pl-k">extends</span> <span class="pl-e">RosieActivity</span> {
+    <span class="pl-k">@Override</span> <span class="pl-k">protected</span> <span class="pl-k">int</span> <span class="pl-en">getLayoutId</span>() {<span class="pl-k">return</span> <span class="pl-smi">R</span><span class="pl-k">.</span>layout<span class="pl-k">.</span>sample_activity;}
+    <span class="pl-c">/*...*/</span>
+}</pre></div>
+
+<h4>
+<a id="butter-knife" class="anchor" href="#butter-knife" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Butter Knife</h4>
+
+<p>By extending Rosie view classes, you will have access in your activities and fragments to <a href="https://github.com/JakeWharton/butterknife">ButterKnife</a> annotations to easily inject your views:</p>
+
+<div class="highlight highlight-source-java"><pre><span class="pl-k">public</span> <span class="pl-k">class</span> <span class="pl-en">SampleActivity</span> <span class="pl-k">extends</span> <span class="pl-e">RosieActivity</span> {
+    <span class="pl-k">@Bind</span>(<span class="pl-smi">R</span><span class="pl-k">.</span>id<span class="pl-k">.</span>sample_view) <span class="pl-smi">TextView</span> sampleView;
+    <span class="pl-c">/*...*/</span>
+}</pre></div>
+
+<h4>
+<a id="dagger" class="anchor" href="#dagger" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Dagger</h4>
+
+<p>Besides, you can define the <a href="https://github.com/square/dagger">Dagger</a> module that will contain the dependencies for your activity by overriding the <code>getActivityScopeModules</code> method:</p>
+
+<div class="highlight highlight-source-java"><pre><span class="pl-k">public</span> <span class="pl-k">class</span> <span class="pl-en">SampleActivity</span> <span class="pl-k">extends</span> <span class="pl-e">RosieActivity</span> {
+    <span class="pl-k">@Override</span> <span class="pl-k">protected</span> <span class="pl-k">List&lt;<span class="pl-smi">Object</span>&gt;</span> <span class="pl-en">getActivityScopeModules</span>() {
+        <span class="pl-k">return</span> <span class="pl-smi">Arrays</span><span class="pl-k">.</span>asList((<span class="pl-smi">Object</span>) <span class="pl-k">new</span> <span class="pl-smi">SampleModule</span>());
+    }
+    <span class="pl-c">/*...*/</span>
+}</pre></div>
+
+<p>There is also two useful annotations to provide <code>Context</code> dependencies into your classes, one for your <code>Application</code> context and one for your current <code>Activity</code>:</p>
+
+<div class="highlight highlight-source-java"><pre><span class="pl-k">public</span> <span class="pl-k">class</span> <span class="pl-en">InjectedClass</span> {
+    <span class="pl-k">@Inject</span> <span class="pl-k">public</span> <span class="pl-en">InjectedClass</span>(<span class="pl-k">@ForApplication</span> <span class="pl-smi">Context</span> <span class="pl-v">applicationContext</span>, <span class="pl-k">@ForActivity</span> <span class="pl-smi">Context</span> <span class="pl-v">activityContext</span>) {
+        <span class="pl-c">/*...*/</span>
+    }
+}</pre></div>
+
+<h4>
+<a id="presenter" class="anchor" href="#presenter" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Presenter</h4>
+
+<p>To follow the MVP pattern, Rosie provides a <code>RosiePresenter</code> class that will be responsible for all your presentation logic. Rosie will take care of linking your view (a <code>RosieActivity</code> or <code>RosieFragment</code> implementation) with your presenter and subscribing it to its lifecycle. In order to do that, create a <code>RosiePresenter</code> and inject it into your activity/fragment with the <code>@Presenter</code> annotation:</p>
+
+<div class="highlight highlight-source-java"><pre><span class="pl-k">public</span> <span class="pl-k">class</span> <span class="pl-en">SamplePresenter</span> <span class="pl-k">extends</span> <span class="pl-e">RosiePresenter&lt;<span class="pl-smi">SamplePresenter</span>.View</span>&gt; {
+    <span class="pl-k">public</span> <span class="pl-k">interface</span> <span class="pl-en">View</span> <span class="pl-k">extends</span> <span class="pl-e">RosiePresenter</span>.<span class="pl-e">View</span> {
+        <span class="pl-c">/*...*/</span>
+    }
+}</pre></div>
+
+<div class="highlight highlight-source-java"><pre><span class="pl-k">public</span> <span class="pl-k">class</span> <span class="pl-en">SampleActivity</span> <span class="pl-k">extends</span> <span class="pl-e">RosieActivity</span> <span class="pl-k">implements</span> <span class="pl-e">SamplePresenter</span>.<span class="pl-e">View</span> {
+    <span class="pl-k">@Inject</span> <span class="pl-k">@Presenter</span> <span class="pl-smi">SamplePresenter</span> presenter;
+    <span class="pl-k">@Override</span> <span class="pl-k">protected</span> <span class="pl-k">void</span> <span class="pl-en">onPreparePresenter</span>() {<span class="pl-c">/*...*/</span>}
+}</pre></div>
+
+<p>Once both, view and presenter, are linked you can react to your view lifecycle directly from the presenter. The <code>onPreparePresenter</code> method gives you the opportunity to configure your presenter before any of these methods are called (e.g. with your intent parameters). You will be also able to call your view easily from the presenter:</p>
+
+<div class="highlight highlight-source-java"><pre><span class="pl-k">public</span> <span class="pl-k">class</span> <span class="pl-en">SamplePresenter</span> <span class="pl-k">extends</span> <span class="pl-e">RosiePresenter&lt;<span class="pl-smi">SamplePresenter</span>.View</span>&gt; {
+    <span class="pl-k">protected</span> <span class="pl-k">void</span> <span class="pl-en">initialize</span>() {<span class="pl-c">/*...*/</span>}
+    <span class="pl-k">protected</span> <span class="pl-k">void</span> <span class="pl-en">update</span>() {<span class="pl-c">/*...*/</span>}
+    <span class="pl-k">protected</span> <span class="pl-k">void</span> <span class="pl-en">pause</span>() {<span class="pl-c">/*...*/</span>}
+    <span class="pl-k">protected</span> <span class="pl-k">void</span> <span class="pl-en">destroy</span>() {<span class="pl-c">/*...*/</span>}
+
+    <span class="pl-k">private</span> <span class="pl-k">void</span> <span class="pl-en">sampleMethod</span>() {
+        <span class="pl-smi">View</span> view <span class="pl-k">=</span> getView(); <span class="pl-c">// Get the view linked to the presenter</span>
+        view<span class="pl-k">.</span>foo();
+    }
+
+    <span class="pl-k">public</span> <span class="pl-k">interface</span> <span class="pl-en">View</span> <span class="pl-k">extends</span> <span class="pl-e">RosiePresenter</span>.<span class="pl-e">View</span> {
+        <span class="pl-k">void</span> <span class="pl-en">foo</span>();
+    }
+}</pre></div>
+
+<p>To understand when the lifecycle methods are called take a look at the following table:</p>
+
+<table>
+<thead>
+<tr>
+<th>RosiePresenter</th>
+<th>Activity</th>
+<th>Fragment</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>initialize</code></td>
+<td><code>onCreate</code></td>
+<td><code>onViewCreated</code></td>
+</tr>
+<tr>
+<td><code>update</code></td>
+<td><code>onResume</code></td>
+<td><code>onResume</code></td>
+</tr>
+<tr>
+<td><code>pause</code></td>
+<td><code>onPause</code></td>
+<td><code>onPause</code></td>
+</tr>
+<tr>
+<td><code>destroy</code></td>
+<td><code>onDestroy</code></td>
+<td><code>onDestroy</code></td>
+</tr>
+</tbody>
+</table>
+
+<h4>
+<a id="renderers" class="anchor" href="#renderers" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Renderers</h4>
+
+<p>Finally, Rosie includes the <a href="https://github.com/pedrovgs/renderers">Renderers</a> library to simplify your <code>RecyclerView</code> handling code. If you decide to use Renderers, remember to extend directly from <code>RosieRenderer&lt;T&gt;</code> to have ButterKnife injections for free in your renderer views.</p>
+
+<h3>
+<a id="domain" class="anchor" href="#domain" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Domain</h3>
+
+<p>The domain package is meant to contain all your business logic that will change from app to app. For that reason, Rosie only provides a single <code>RosieUseCase</code> class that will help you execute your use cases in background following the command pattern.</p>
+
+<p>To start using the Rosie domain package, create your use cases extending <code>RosieUseCase</code> and define the method containing your use case logic. Remember to call <code>notifySuccess</code> or <code>notifyError</code> to get results back to your presenter:</p>
+
+<div class="highlight highlight-source-java"><pre><span class="pl-k">public</span> <span class="pl-k">class</span> <span class="pl-en">DoSomething</span> <span class="pl-k">extends</span> <span class="pl-e">RosieUseCase</span> {
+    <span class="pl-k">@UseCase</span> <span class="pl-k">public</span> <span class="pl-k">void</span> <span class="pl-en">doSomething</span>(<span class="pl-smi">Object</span> <span class="pl-v">arg</span>) {
+        <span class="pl-smi">Object</span> response <span class="pl-k">=</span> getData();
+        <span class="pl-k">if</span> (response<span class="pl-k">.</span>isOk()) {
+            notifySuccess(response<span class="pl-k">.</span>getContent());
+        } <span class="pl-k">else</span> {
+            notifyError(response<span class="pl-k">.</span>getError());
+        }
+    }
+}</pre></div>
+
+<p>To call your use case, create a <code>UseCaseCall</code>, configure it and execute it. Rosie gives you a fluent API to easily do this from your presenters:</p>
+
+<div class="highlight highlight-source-java"><pre><span class="pl-k">public</span> <span class="pl-k">class</span> <span class="pl-en">SamplePresenter</span> <span class="pl-k">extends</span> <span class="pl-e">RosiePresenter&lt;<span class="pl-smi">SamplePresenter</span>.View</span>&gt; {
+    <span class="pl-k">public</span> <span class="pl-k">void</span> <span class="pl-en">callUseCase</span>() {
+        createUseCaseCall(doSomething)
+            .args(arg <span class="pl-c">/*, arg2, arg3, ...*/</span>)
+            .onSuccess(<span class="pl-k">new</span> <span class="pl-smi">OnSuccessCallback</span>() {
+                <span class="pl-c">/*...*/</span>
+            })
+            .onError(<span class="pl-k">new</span> <span class="pl-smi">OnErrorCallback</span>() {
+                <span class="pl-c">/*...*/</span>
+            })
+            .execute();
+    }
+    <span class="pl-c">/*...*/</span>
+}</pre></div>
+
+<p>All the configuration calls are optional and can be omitted when not needed but keep in mind that provided arguments must match the ones declared in your <code>UseCase</code> method or an error will be raised. It is important to keep in mind that, by default, your callback methods will be executed in the main thread so you can easily update your UI from them.</p>
+
+<h4>
+<a id="named-use-cases" class="anchor" href="#named-use-cases" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Named use cases</h4>
+
+<p>Sometimes you need to specify use cases that are very similar to each other. To avoid creating multiple classes representing every use case configuration, you can create a single <code>RosieUseCase</code> class with multiple methods. Rosie will be able to identify the use case being called by matching its input parameters. If you create two methods with the <code>@UseCase</code> annotation that have the same input parameters, you can provide a name to each of them in order to identify them:</p>
+
+<div class="highlight highlight-source-java"><pre><span class="pl-k">public</span> <span class="pl-k">class</span> <span class="pl-en">DoSomething</span> <span class="pl-k">extends</span> <span class="pl-e">RosieUseCase</span> {
+    <span class="pl-k">public</span> <span class="pl-k">static</span> <span class="pl-k">final</span> <span class="pl-smi">String</span> <span class="pl-c1">USE_CASE_NAME</span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>UseCaseName<span class="pl-pds">"</span></span>;
+    <span class="pl-k">public</span> <span class="pl-k">static</span> <span class="pl-k">final</span> <span class="pl-smi">String</span> <span class="pl-c1">OTHER_USE_CASE_NAME</span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>OtherUseCaseName<span class="pl-pds">"</span></span>;
+    <span class="pl-k">@UseCase</span>(<span class="pl-c1">name</span> <span class="pl-k">=</span> <span class="pl-c1">USE_CASE_NAME</span>) <span class="pl-k">public</span> <span class="pl-k">void</span> <span class="pl-en">doSomething</span>(<span class="pl-smi">Object</span> <span class="pl-v">arg</span>) {<span class="pl-c">/*...*/</span>}
+    <span class="pl-k">@UseCase</span>(<span class="pl-c1">name</span> <span class="pl-k">=</span> <span class="pl-c1">OTHER_USE_CASE_NAME</span>) <span class="pl-k">public</span> <span class="pl-k">void</span> <span class="pl-en">doSomethingElse</span>(<span class="pl-smi">Object</span> <span class="pl-v">arg</span>) {<span class="pl-c">/*...*/</span>}
+}</pre></div>
+
+<p>Even though using names is not mandatory when the method input parameters are different, it's highly recommended to use them just to make its usage more readable.</p>
+
+<p>To call a named use case just configure its name:</p>
+
+<div class="highlight highlight-source-java"><pre><span class="pl-k">public</span> <span class="pl-k">class</span> <span class="pl-en">SamplePresenter</span> <span class="pl-k">extends</span> <span class="pl-e">RosiePresenter&lt;<span class="pl-smi">SamplePresenter</span>.View</span>&gt; {
+    <span class="pl-k">public</span> <span class="pl-k">void</span> <span class="pl-en">callUseCase</span>() {
+        createUseCaseCall(doSomething)
+            .args(arg)
+            .useCaseName(<span class="pl-smi">DoSomething</span><span class="pl-c1"><span class="pl-k">.</span>USE_CASE_NAME</span>)
+            .execute();
+    }
+    <span class="pl-c">/*...*/</span>
+}</pre></div>
+
+<h3>
+<a id="error-handling" class="anchor" href="#error-handling" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Error handling</h3>
+
+<p>Errors can be either manually reported or implicitly notified when an exception is thrown from your use case context. To handle errors, there is a capturing event system that iterates over all your registered <code>OnErrorCallback</code> implementations and notifies them of the issue. Every callback needs to return a boolean value to inform whether the error has been handled and needs no further management. Callbacks are always called in this specific order:</p>
+
+<ol>
+<li>Use case specific callback; the ones you register while calling a use case.</li>
+<li>Global callbacks; the ones you can register from your presenter constructor.</li>
+</ol>
+
+<p>With this approach you can create an error callback in your presenter that shows a generic error message to your user and create multiple other listeners for specific use cases and/or errors.</p>
+
+<p>To register global callbacks from your presenter, call <code>registerOnErrorCallback</code> in the constructor:</p>
+
+<div class="highlight highlight-source-java"><pre><span class="pl-k">public</span> <span class="pl-k">class</span> <span class="pl-en">SamplePresenter</span> <span class="pl-k">extends</span> <span class="pl-e">RosiePresenter&lt;<span class="pl-smi">SamplePresenter</span>.View</span>&gt; <span class="pl-k">implements</span> <span class="pl-e">OnErrorCallback</span> {
+    <span class="pl-k">public</span> <span class="pl-en">SamplePresenter</span>(<span class="pl-smi">UseCaseHandler</span> <span class="pl-v">useCaseHandler</span>) {
+        <span class="pl-v">super</span>(useCaseHandler);
+        registerOnErrorCallback(<span class="pl-v">this</span>);
+    }
+
+    <span class="pl-k">@Override</span> <span class="pl-k">public</span> <span class="pl-k">boolean</span> <span class="pl-en">onError</span>(<span class="pl-smi">Error</span> <span class="pl-v">error</span>) {
+        getView()<span class="pl-k">.</span>showGenericError();
+        <span class="pl-k">return</span> <span class="pl-c1">true</span>;
+    }
+}</pre></div>
+
+<p>As explained in the <code>UseCase</code> section, you can also register error callbacks for a use case call. Rosie will assign those a higher priority:</p>
+
+<div class="highlight highlight-source-java"><pre><span class="pl-k">public</span> <span class="pl-k">class</span> <span class="pl-en">SamplePresenter</span> <span class="pl-k">extends</span> <span class="pl-e">RosiePresenter&lt;<span class="pl-smi">SamplePresenter</span>.View</span>&gt; {
+    <span class="pl-k">public</span> <span class="pl-k">void</span> <span class="pl-en">callUseCase</span>() {
+        createUseCaseCall(doSomething)
+            .args(arg)
+            .onError(<span class="pl-k">new</span> <span class="pl-smi">OnErrorCallback</span>() {
+                <span class="pl-en">getView</span>().<span class="pl-en">showSpecificError</span>();
+                <span class="pl-c">// The error has been handled</span>
+                <span class="pl-c">// Avoid calling any other error callback by returning true</span>
+                <span class="pl-k">return</span> <span class="pl-c1">true</span>;
+            })
+            .execute();
+    }
+    <span class="pl-c">/*...*/</span>
+}</pre></div>
+
+<p>You can create your own ErrorFactory implementation to map Exceptions to Errors. In your implementation you can unify your error handling.</p>
+
+<div class="highlight highlight-source-java"><pre><span class="pl-k">public</span> <span class="pl-k">class</span> <span class="pl-en">CustomErrorFactory</span> <span class="pl-k">extends</span> <span class="pl-e">ErrorFactory</span> {
+
+    <span class="pl-k">@Inject</span> <span class="pl-k">public</span> <span class="pl-en">CustomErrorFactory</span>() {
+    }
+
+    <span class="pl-k">@Override</span> <span class="pl-k">public</span> <span class="pl-smi">Error</span> <span class="pl-en">create</span>(<span class="pl-smi">Exception</span> <span class="pl-v">exception</span>) {
+        <span class="pl-k">if</span> (targetException <span class="pl-k">instanceof</span> <span class="pl-smi">MyConnectionException</span>) {
+            <span class="pl-k">return</span> <span class="pl-k">new</span> <span class="pl-smi">ConnectionError</span>();
+        }
+        <span class="pl-k">return</span> <span class="pl-k">new</span> <span class="pl-smi">UnknownError</span>();
+  }
+}</pre></div>
+
+<p>Remember to provide your ErrorFactory implementation inside a Dagger module.</p>
+
+<div class="highlight highlight-source-java"><pre>    @<span class="pl-smi">Provides</span> <span class="pl-k">public</span> <span class="pl-smi">ErrorHandler</span> providesErrorHandler(<span class="pl-smi">CustomErrorFactory</span> errorFactory) {
+        <span class="pl-k">return</span> <span class="pl-k">new</span> <span class="pl-smi">ErrorHandler</span>(errorFactory);
+    }</pre></div>
+
+<h3>
+<a id="repository" class="anchor" href="#repository" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Repository</h3>
+
+<p>The third layer is meant to encapsulate your data sources. To start using it just extend <code>RosieRepository</code> and configure its data sources in its constructor:</p>
+
+<div class="highlight highlight-source-java"><pre><span class="pl-k">public</span> <span class="pl-k">class</span> <span class="pl-en">SampleRepository</span> <span class="pl-k">extends</span> <span class="pl-e">RosieRepository&lt;<span class="pl-smi">Key</span>, <span class="pl-smi">Value</span>&gt;</span> {
+    <span class="pl-k">@Inject</span> <span class="pl-k">public</span> <span class="pl-en">SampleRepository</span>(<span class="pl-smi">SampleApiDataSource</span> <span class="pl-v">sampleApiDataSource</span>,
+            <span class="pl-smi">SampleCacheDataSource</span> <span class="pl-v">sampleCacheDataSource</span>) {
+        addReadableDataSources(sampleApiDataSource);
+        addCacheDataSources(sampleCacheDataSource);
+    }
+}</pre></div>
+
+<p>There are three different types of data sources and each one has its own interface that you can implement to use it in your repository:</p>
+
+<ul>
+<li>
+<code>ReadableDataSource&lt;K, V&gt;</code>: Defines data sources where you can read values by a given key or retrieving them all.</li>
+<li>
+<code>WriteableDataSource&lt;K, V&gt;</code>: Defines data sources where you can persist data with operations to add, update or delete values.</li>
+<li>
+<code>CacheDataSource&lt;K, V&gt;</code>: Defines a mix of readable and writeable data sources to speed up access to your values.</li>
+</ul>
+
+<p>There are empty implementations of each data source to simplify your own subclasses by overriding only the methods that make sense in your context. Besides, there is a generic <code>InMemoryCacheDataSource</code> to store recent values up to a configurable time.</p>
+
+<div class="highlight highlight-source-java"><pre><span class="pl-k">public</span> <span class="pl-k">class</span> <span class="pl-en">SampleRepository</span> <span class="pl-k">extends</span> <span class="pl-e">RosieRepository&lt;<span class="pl-smi">Key</span>, <span class="pl-smi">Value</span>&gt;</span> {
+    <span class="pl-k">@Inject</span> <span class="pl-k">public</span> <span class="pl-en">SampleRepository</span>() {
+    <span class="pl-k">PaginatedCacheDataSource&lt;<span class="pl-smi">Key</span>, <span class="pl-smi">Value</span>&gt;</span> inMemoryCacheDataSource <span class="pl-k">=</span>
+        <span class="pl-k">new</span> <span class="pl-k">InMemoryCacheDataSource&lt;&gt;</span>(<span class="pl-k">new</span> <span class="pl-smi">TimeProvider</span>(), <span class="pl-c1">MINUTES</span><span class="pl-k">.</span>toMillis(<span class="pl-c1">5</span>));
+    addCacheDataSources(inMemoryCacheDataSource);
+  }
+}</pre></div>
+
+<p>Users of the repositories can retrieve or modify data by using one of the multiple methods available for that matter. There are multiple ways to retrieve and store data using repositories, the following snippet shows some of the most useful:</p>
+
+<div class="highlight highlight-source-java"><pre><span class="pl-c">// Initialization</span>
+<span class="pl-smi">Key</span> key <span class="pl-k">=</span> <span class="pl-c">/*...*/</span>; <span class="pl-smi">Value</span> value; <span class="pl-k">Collection&lt;<span class="pl-smi">Value</span>&gt;</span> values;
+<span class="pl-k">RosieRepository&lt;<span class="pl-smi">Key</span>, <span class="pl-smi">Value</span>&gt;</span> repository <span class="pl-k">=</span> <span class="pl-c">/*...*/</span>;
+
+<span class="pl-c">// Get a value by its key</span>
+value <span class="pl-k">=</span> repository<span class="pl-k">.</span>getByKey(key);
+<span class="pl-c">// Get a value by its key using only the defined cache</span>
+value <span class="pl-k">=</span> repository<span class="pl-k">.</span>getByKey(key, <span class="pl-smi">ReadPolicy</span><span class="pl-c1"><span class="pl-k">.</span>CACHE_ONLY</span>);
+<span class="pl-c">// Get all the available values</span>
+values <span class="pl-k">=</span> repository<span class="pl-k">.</span>getAll();
+<span class="pl-c">// Get all the available values using only readable sources</span>
+values <span class="pl-k">=</span> repository<span class="pl-k">.</span>getAll(<span class="pl-smi">ReadPolicy</span><span class="pl-c1"><span class="pl-k">.</span>READABLE_ONLY</span>);
+<span class="pl-c">// Add a new value</span>
+repository<span class="pl-k">.</span>addOrUpdate(value);
+<span class="pl-c">// Add a new value only to the first writeable data source that works</span>
+repository<span class="pl-k">.</span>addOrUpdate(value, <span class="pl-smi">WritePolicy</span><span class="pl-c1"><span class="pl-k">.</span>WRITE_ONCE</span>);
+<span class="pl-c">// Delete a value by its key</span>
+repository<span class="pl-k">.</span>deleteByKey(key);
+<span class="pl-c">// Delete all values stored in the repository</span>
+repository<span class="pl-k">.</span>deleteAll();</pre></div>
+
+<h4>
+<a id="paginated-repositories" class="anchor" href="#paginated-repositories" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Paginated repositories</h4>
+
+<p>Finally, Rosie gives you support for pagination in repositories. If your data is paginated, just extend <code>PaginatedRosieRepository</code> instead of <code>RosieRepository</code>. You will also need to implement your paginated data sources, <code>PaginatedReadableDataSource&lt;V&gt;</code> and <code>PaginatedCacheDataSource&lt;K, V&gt;</code>. Once your paginated repository is completely defined and configured you will be able to use it just as a regular repository with additional pagination-related methods:</p>
+
+<div class="highlight highlight-source-java"><pre><span class="pl-c">// Initialization</span>
+<span class="pl-smi">Key</span> key <span class="pl-k">=</span> <span class="pl-c">/*...*/</span>; <span class="pl-k">PaginatedCollection&lt;<span class="pl-smi">Value</span>&gt;</span> page;
+<span class="pl-k">PaginatedRosieRepository&lt;<span class="pl-smi">Key</span>, <span class="pl-smi">Value</span>&gt;</span> repository <span class="pl-k">=</span> <span class="pl-c">/*...*/</span>;
+
+<span class="pl-c">// Get a value by its key just as with a regular repository</span>
+<span class="pl-smi">Value</span> value <span class="pl-k">=</span> repository<span class="pl-k">.</span>getByKey(key);
+<span class="pl-c">// Get a page</span>
+page <span class="pl-k">=</span> repository<span class="pl-k">.</span>getPage(<span class="pl-smi">Page</span><span class="pl-k">.</span>withOffsetAndLimit(offset, limit));
+<span class="pl-c">// Get a page using only the cache data source</span>
+page <span class="pl-k">=</span> repository<span class="pl-k">.</span>getPage(<span class="pl-smi">Page</span><span class="pl-k">.</span>withOffsetAndLimit(offset, limit), <span class="pl-smi">ReadPolicy</span><span class="pl-c1"><span class="pl-k">.</span>CACHE_ONLY</span>);</pre></div>
+
+<p><strong>To run the application using real data obtained from the Marvel API create a <code>marvel.properties</code> file inside the <code>sample</code> directory and add your public and private key there as follows:</strong></p>
+
+<pre><code>MARVEL_PUBLIC_KEY="YOUR_MARVEL_PUBLIC_KEY"
+MARVEL_PRIVATE_KEY="YOUR_MARVEL_PRIVATE_KEY"
+</code></pre>
+
+<h2>
+<a id="add-it-to-your-project" class="anchor" href="#add-it-to-your-project" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Add it to your project</h2>
+
+<p>Include the library in your <code>build.gradle</code></p>
+
+<div class="highlight highlight-source-groovy"><pre>dependencies{
+    compile <span class="pl-s"><span class="pl-pds">'</span>com.karumi.rosie:rosie:1.0.0<span class="pl-pds">'</span></span>
+}</pre></div>
+
+<p>or to your <code>pom.xml</code> if you are using Maven</p>
+
+<div class="highlight highlight-text-xml"><pre>&lt;<span class="pl-ent">dependency</span>&gt;
+    &lt;<span class="pl-ent">groupId</span>&gt;com.karumi.rosie&lt;/<span class="pl-ent">groupId</span>&gt;
+    &lt;<span class="pl-ent">artifactId</span>&gt;rosie&lt;/<span class="pl-ent">artifactId</span>&gt;
+    &lt;<span class="pl-ent">version</span>&gt;1.0.0&lt;/<span class="pl-ent">version</span>&gt;
+    &lt;<span class="pl-ent">type</span>&gt;aar&lt;/<span class="pl-ent">type</span>&gt;
+&lt;/<span class="pl-ent">dependency</span>&gt;
+</pre></div>
+
+<h2>
+<a id="do-you-want-to-contribute" class="anchor" href="#do-you-want-to-contribute" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Do you want to contribute?</h2>
+
+<p>Feel free to report us or add any useful feature to the library, we will be glad to improve it with your help.</p>
+
+<p>Keep in mind that your PRs <strong>must</strong> be validated by Travis-CI. Please, run a local build with <code>./gradlew checkstyle build connectedCheck</code> before submitting your code.</p>
+
+<h2>
+<a id="libraries-used-in-this-project" class="anchor" href="#libraries-used-in-this-project" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Libraries used in this project</h2>
+
+<ul>
+<li><a href="https://github.com/junit-team/junit">JUnit</a></li>
+<li><a href="https://github.com/mockito/mockito">Mockito</a></li>
+<li><a href="https://github.com/robolectric/robolectric">Robolectric</a></li>
+<li><a href="https://github.com/JakeWharton/butterknife">ButterKnife</a></li>
+<li><a href="https://github.com/square/dagger">Dagger</a></li>
+<li><a href="https://github.com/pedrovgs/renderers">Renderers</a></li>
+<li><a href="https://github.com/yigit/android-priority-jobqueue">Android Priority Job Queue</a></li>
+</ul>
+
+<h2>
+<a id="license" class="anchor" href="#license" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>License</h2>
+
+<pre><code>Copyright 2015 Karumi
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+</code></pre>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/Karumi/Rosie">Rosie</a> is maintained by <a href="https://github.com/Karumi">Karumi</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+  
+  </body>
+</html>
