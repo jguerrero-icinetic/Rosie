@@ -21,6 +21,7 @@ import com.karumi.rosie.repository.datasource.paginated.InMemoryPaginatedCacheDa
 import com.karumi.rosie.repository.datasource.paginated.PaginatedCacheDataSource;
 import com.karumi.rosie.sample.base.view.error.MarvelErrorFactory;
 import com.karumi.rosie.sample.characters.domain.model.Character;
+import com.karumi.rosie.sample.characters.domain.model.CharacterCrash;
 import com.karumi.rosie.sample.comics.domain.model.ComicSeries;
 import com.karumi.rosie.sample.main.domain.usecase.GetMarvelSettings;
 import com.karumi.rosie.time.TimeProvider;
@@ -37,12 +38,19 @@ import static java.util.concurrent.TimeUnit.MINUTES;
     }) public class ApplicationModule {
 
   private static final long CHARACTERS_IN_MEMORY_CACHE_TTL = MINUTES.toMillis(5);
+  private static final long CHARACTERS_CRASH_IN_MEMORY_CACHE_TTL = MINUTES.toMillis(5);
   private static final long COMICS_IN_MEMORY_CACHE_TTL = MINUTES.toMillis(5);
 
   @Provides @Singleton
   public PaginatedCacheDataSource<String, Character> provideCharactersPageInMemoryCache() {
     return new InMemoryPaginatedCacheDataSource<>(new TimeProvider(),
         CHARACTERS_IN_MEMORY_CACHE_TTL);
+  }
+
+  @Provides @Singleton
+  public PaginatedCacheDataSource<String, CharacterCrash> provideCharactersCrashPageInMemoryCache() {
+    return new InMemoryPaginatedCacheDataSource<>(new TimeProvider(),
+            CHARACTERS_CRASH_IN_MEMORY_CACHE_TTL);
   }
 
   @Provides @Singleton

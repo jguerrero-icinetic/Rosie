@@ -22,6 +22,8 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import butterknife.Bind;
 import com.karumi.rosie.sample.R;
 import com.karumi.rosie.sample.base.view.activity.MarvelActivity;
@@ -55,6 +57,7 @@ public class MainActivity extends MarvelActivity implements FakeDataPresenter.Vi
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     initializeViewPager();
+    Toast.makeText(this, "Click sobre algún super héroe", Toast.LENGTH_LONG).show();
   }
 
   private void initializeViewPager() {

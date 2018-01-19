@@ -22,11 +22,15 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import butterknife.Bind;
 import com.karumi.rosie.sample.R;
 import com.karumi.rosie.sample.base.view.activity.MarvelActivity;
 import com.karumi.rosie.sample.characters.CharactersModule;
+import com.karumi.rosie.sample.characters.view.presenter.CharacterCrashDetailsPresenter;
 import com.karumi.rosie.sample.characters.view.presenter.CharacterDetailsPresenter;
+import com.karumi.rosie.sample.characters.view.viewmodel.CharacterCrashDetailViewModel;
 import com.karumi.rosie.sample.characters.view.viewmodel.CharacterDetailViewModel;
 import com.karumi.rosie.view.Presenter;
 import com.squareup.picasso.Picasso;
@@ -36,7 +40,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 public class CharacterDetailsActivity extends MarvelActivity
-    implements CharacterDetailsPresenter.View {
+    implements CharacterCrashDetailsPresenter.View, CharacterDetailsPresenter.View {
 
   private static final String CHARACTER_KEY_EXTRA = "CharacterDetailsActivity.CharacterKey";
 
@@ -48,6 +52,7 @@ public class CharacterDetailsActivity extends MarvelActivity
   @Bind(R.id.loading) RotateLoading loadingView;
 
   @Inject @Presenter CharacterDetailsPresenter presenter;
+  @Inject @Presenter CharacterCrashDetailsPresenter presenterCrash;
 
   @Override protected int getLayoutId() {
     return R.layout.activity_character_details;
@@ -62,6 +67,9 @@ public class CharacterDetailsActivity extends MarvelActivity
     Bundle extras = getIntent().getExtras();
     String characterKey = extras.getString(CHARACTER_KEY_EXTRA);
     presenter.setCharacterKey(characterKey);
+    presenterCrash.setCharacterKey(characterKey);
+
+    Toast.makeText(this, "Pulsa atrás antes de 4 segundos", Toast.LENGTH_LONG).show();
   }
 
   @Override public void hideLoading() {
@@ -99,5 +107,16 @@ public class CharacterDetailsActivity extends MarvelActivity
     Intent intent = new Intent(context, CharacterDetailsActivity.class);
     intent.putExtra(CHARACTER_KEY_EXTRA, characterKey);
     context.startActivity(intent);
+  }
+
+  @Override
+  public void hideCharacterCrashDetail() {
+    // Unused
+  }
+
+  @Override
+  public void showCharacterDetail(CharacterCrashDetailViewModel character) {
+    // Unused
+    Toast.makeText(this, "Tarde!! Inténtalo otra vez", Toast.LENGTH_LONG).show();
   }
 }
